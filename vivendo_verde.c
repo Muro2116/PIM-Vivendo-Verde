@@ -10,11 +10,32 @@
 
 // Função de delay
 void delay(int seconds) {
+    // Windows
     #ifdef _WIN32
         Sleep(seconds * 1000);
+    // Linux
     #else
         sleep(seconds);
     #endif
+}
+
+// Função para Exibir a Logo
+int exibir_logo() {
+    // Localizar logo.txt
+    FILE *arquivo = fopen("logo.txt", "r");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir a Logo\n");
+        return 1;
+    }
+    // Imprimir o Arquivo
+    char linha[256];
+    while (fgets(linha, sizeof(linha), arquivo)) {
+        printf("%s", linha);
+        delay(1);
+    }
+    // Fechar o Arquivo
+    fclose(arquivo);
+    return 0;
 }
 
 // Função para limpar o buffer
@@ -185,6 +206,9 @@ int main() {
     ler_produtos(arquivo, &produtos, qtd_linhas);
     fclose(arquivo);
 
+    // Logo
+    exibir_logo();
+
     // Loop Login
     while (!loginCorreto) {
         printf("\nDigite seu Usuario: ");
@@ -253,7 +277,7 @@ int main() {
 
                 switch (opcao) {
                     case 1:
-                        adicionar_produto(&produtos, &qtd_linhas);
+                       adicionar_produto(&produtos, &qtd_linhas);
                         break;
                     case 2:
                         imprimir_produtos(produtos, qtd_linhas);
