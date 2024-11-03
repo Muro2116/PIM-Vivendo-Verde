@@ -51,7 +51,7 @@ Produto* adicionar_produto(Produto* produtos, int* qtd_produtos) {
 
     // Preenche as informações do novo produto
     Produto* novo_produto = &produtos[*qtd_produtos];
-    novo_produto->idproduto = *qtd_produtos + 1; // ID automático
+    novo_produto->idproduto = *qtd_produtos + 1;
 
     // Nome do produto
     printf("Digite o nome do produto: ");
@@ -81,7 +81,7 @@ Produto* adicionar_produto(Produto* produtos, int* qtd_produtos) {
 
     // Incrementa a quantidade de produtos
     (*qtd_produtos)++;
-    printf("Produto adicionado com sucesso!\n");
+    puts("Produto adicionado com sucesso!");
 
     return produtos;
 }
@@ -329,9 +329,9 @@ int main() {
                         break;
 
                     default:
+                        // Opção invalida
                         puts("Opcao invalida!");
                         delay(2);
-                        // Opção invalida
                 }
             } while(opcao != 'C');
         }
