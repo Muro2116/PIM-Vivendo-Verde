@@ -234,7 +234,6 @@ int main() {
             printf("\nBem-vindo, %s!\n", usuario);
 
             do {
-                limpar_entrada();
                 printf("\nSelecione uma Opcao:\n");
                 printf(" A. Adicionar Produto ao Carrinho\n");
                 printf(" B. Consultar Lista de Produtos\n");
@@ -265,8 +264,7 @@ int main() {
                                 encontrado = 1;
 
                                 // Exibe informações do produto encontrado
-                                printf("Produto encontrado: %s (%.2f por %s)\n", 
-                                    produtos[j].nomeproduto, produtos[j].valorproduto, produtos[j].tipovenda);
+                                printf("Produto encontrado: %s (%.2f por %s)\n", produtos[j].nomeproduto, produtos[j].valorproduto, produtos[j].tipovenda);
                                 printf("Digite a quantidade em %s: ", produtos[j].tipovenda);
                                 scanf("%f", &quantidade);
 
@@ -408,7 +406,7 @@ int main() {
             } while (opcao != 'C');
         } 
         else {
-            printf("Usuario ou senha incorretos! Tente novamente.\n");
+            printf("Usuario ou senha incorretos! Tente novamente...\n");
             delay(2);
         }
     }
