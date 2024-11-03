@@ -38,7 +38,7 @@ int exibir_logo() {
     return 0;
 }
 
-// Função para limpar o buffer
+// Função para limpar o buffer de entrada
 void limpar_entrada() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
@@ -51,6 +51,11 @@ typedef struct {
     float valorproduto;
     char tipovenda[20];
 } Produto;
+
+typedef struct {
+    char produtocarrinho[50];
+    float valortotalcarrinho;
+} Carrinho;
 
 // Função para contar quantidade de produtos no arquivo
 int contar_linhas(FILE *arquivo) {
@@ -137,9 +142,11 @@ void adicionar_produto(Produto **produtos, int *qtd) {
                 limpar_entrada();
                 if (tipoescolha == 1) {
                     strcpy(tiponovo, "kg");
-                } else if (tipoescolha == 2) {
+                } 
+                else if (tipoescolha == 2) {
                     strcpy(tiponovo, "unidade");
-                } else {
+                } 
+                else {
                     printf("Digite uma entrada valida!\n");
                     limpar_entrada();
                     delay(2);
@@ -186,10 +193,10 @@ void adicionar_produto(Produto **produtos, int *qtd) {
 
 // Main
 int main() {
-    char usuario[16], senha[16];
+    char usuario[16], senha[16], opcao;
     char caixaU[16] = "Compra", caixaS[16] = "senha123";
     char admU[16] = "Josney", admS[16] = "Jos72";
-    int loginCorreto = 0, opcao = 0;
+    int loginCorreto = 0;
 
     FILE *arquivo = fopen("produtos.txt", "r");
     if (arquivo == NULL) {
@@ -205,6 +212,10 @@ int main() {
     Produto *produtos = NULL;
     ler_produtos(arquivo, &produtos, qtd_linhas);
     fclose(arquivo);
+
+    // Array Carrinho 
+    Carrinho *carrinho = NULL;
+    int num_itens = 0;
 
     // Logo
     exibir_logo();
@@ -223,45 +234,148 @@ int main() {
             printf("\nBem-vindo, %s!\n", usuario);
 
             do {
+                limpar_entrada();
                 printf("\nSelecione uma Opcao:\n");
-                printf(" 1. Adicionar Produto ao Carrinho\n");
-                printf(" 2. Consultar Lista de Produtos\n");
-                printf(" 3. Visualizar Carrinho\n");
-                printf(" 4. Finalizar Compra\n");
-                printf(" 5. Cancelar Compra\n");
-                printf(" 6. Sair\n");
+                printf(" A. Adicionar Produto ao Carrinho\n");
+                printf(" B. Consultar Lista de Produtos\n");
+                printf(" C. Visualizar Carrinho\n");
+                printf(" D. Finalizar Compra\n");
+                printf(" E. Cancelar Compra\n");
+                printf(" F. Sair\n");
                 printf("Opcao: ");
-                scanf("%d", &opcao);
+                scanf(" %c", &opcao);
+            
+                int continuar = 1;
 
                 switch (opcao) {
-                    case 1:
-                        // Mostrar Lista de Produtos
-                        // Adicionar Produto ao carrinho (ID)
-                        // Perguntar Se quer adicionar outro produto
-                        break;
-                    case 2:
+                case 'A':
+                    imprimir_produtos(produtos, qtd_linhas);
+
+                    while (continuar == 1) {
+                        float quantidade;
+                        int id = 0, j, encontrado = 0;
+
+                        // Solicita o ID do produto desejado
+                        printf("Digite o ID do produto que deseja comprar: ");
+                        scanf("%d", &id);
+
+                        // Busca o produto pelo ID
+                        for (j = 0; j < qtd_linhas; j++) {
+                            if (produtos[j].idproduto == id) {
+                                encontrado = 1;
+
+                                // Exibe informações do produto encontrado
+                                printf("Produto encontrado: %s (%.2f por %s)\n", 
+                                    produtos[j].nomeproduto, produtos[j].valorproduto, produtos[j].tipovenda);
+                                printf("Digite a quantidade em %s: ", produtos[j].tipovenda);
+                                scanf("%f", &quantidade);
+
+                                // Aloca espaço para o novo item no carrinho
+                                carrinho = (Carrinho *)realloc(carrinho, (num_itens + 1) * sizeof(Carrinho));
+                                if (carrinho == NULL) {
+                                    printf("Erro de memoria!\n");
+                                    return 1;
+                                }
+
+                                // Armazena o produto e o valor total no carrinho
+                                strcpy(carrinho[num_itens].produtocarrinho, produtos[j].nomeproduto);
+                                carrinho[num_itens].valortotalcarrinho = produtos[j].valorproduto * quantidade;
+                                num_itens++;
+
+                                printf("Produto adicionado ao carrinho!\n");
+                                break;
+                            }
+                        }
+
+                        if (!encontrado) {
+                            printf("Produto nao encontrado!\n");
+                        }
+
+                        // Pergunta se o usuário deseja adicionar mais produtos
+                        printf("Deseja adicionar outro produto? (1 - Sim, 2 - Nao): ");
+                        scanf("%d", &continuar);
+                    }
+                    break;
+
+                    case 'B':
                         imprimir_produtos(produtos, qtd_linhas);
                         break;
-                    case 4:
-                        // Mostrar o Carrinho
-                        // Perguntar se Deseja Finalizar Compra
-                        // Limpa o Carrinho
+                    case 'C':
+                        if (num_itens == 0) {
+                            printf("O carrinho esta vazio!\n");
+                        } 
+                        else {
+                            for (int i = 0; i < num_itens; i++) {
+                                printf("Produto: %s | Valor Total: R$%.2f\n", carrinho[i].produtocarrinho, carrinho[i].valortotalcarrinho);
+                            }
+                        }
                         break;
-                    case 5:
-                        // Pergunta se Deseja Cancelar Compra
-                        // Limpa o Carrinho
+                    case 'D':
+                        if (num_itens == 0) {
+                            printf("O carrinho esta vazio!\n");
+                            delay(1);
+                            break;
+                        }
+
+                        // Exibe os itens no carrinho e calcula o total
+                        printf("\n. . . . . . . . Itens no Carrinho . . . . . . . .\n");
+                        float valor_total = 0.0;
+                        for (int i = 0; i < num_itens; i++) {
+                            printf("Produto: %s | Valor Total: R$%.2f\n", carrinho[i].produtocarrinho, carrinho[i].valortotalcarrinho);
+                            valor_total += carrinho[i].valortotalcarrinho;
+                        }
+                        printf("Valor total da compra: R$%.2f\n", valor_total);
+                        printf("_________________________________________________\n");
+
+                        // Pergunta se o usuário deseja finalizar a compra
+                        int finalizar;
+                        printf("Deseja finalizar a compra? (1 - Sim, 2 - Nao): ");
+                        scanf("%d", &finalizar);
+
+                        if (finalizar == 1) {
+                            printf("Compra finalizada! Valor total: R$%.2f\n", valor_total);
+                            // Limpa o carrinho
+                            free(carrinho);
+                            carrinho = NULL;
+                            num_itens = 0;
+                        } 
+                        else {
+                            printf("Compra nao finalizada!\n");
+                        }
                         break;
-                    case 6:
+                    case 'E':
+                        if (num_itens == 0) {
+                            printf("O carrinho esta vazio!\n");
+                            delay(1);
+                            break;
+                        }
+
+                        int cancelar;
+                        printf("Tem certeza de que deseja cancelar a compra? (1 - Sim, 2 - Nao): ");
+                        scanf("%d", &cancelar);
+
+                        if (cancelar == 1) {
+                            printf("Compra cancelada. Todos os itens foram removidos do carrinho\n");
+                            // Libera a memória alocada para o carrinho e redefine as variáveis
+                            free(carrinho);
+                            carrinho = NULL;
+                            num_itens = 0;
+                        }
+                        else {
+                            printf("Cancelamento de compra abortado\n");
+                        }
+                        break;
+                    case 'F':
                         printf("Saindo do sistema...\n");
-                        limpar_entrada();
                         delay(2);
                         break;
                     default:
                         printf("Opcao invalida!\n");
+                        limpar_entrada();
                         delay(2);
                 }
-            } while (opcao != 6);
-        } 
+            } while (opcao != 'F');
+        }
         // Tela da Administração
         else if (strcmp(usuario, admU) == 0 && strcmp(senha, admS) == 0) {
             loginCorreto = 1;
@@ -269,20 +383,20 @@ int main() {
 
             do {
                 printf("\nSelecione uma Opcao:\n");
-                printf(" 1. Adicionar Produto\n");
-                printf(" 2. Consultar Lista de Produtos\n");
-                printf(" 3. Sair\n");
+                printf(" A. Adicionar Produto\n");
+                printf(" B. Consultar Lista de Produtos\n");
+                printf(" C. Sair\n");
                 printf("Opcao: ");
-                scanf("%d", &opcao);
+                scanf(" %c", &opcao);
 
                 switch (opcao) {
-                    case 1:
+                    case 'A':
                        adicionar_produto(&produtos, &qtd_linhas);
                         break;
-                    case 2:
+                    case 'B':
                         imprimir_produtos(produtos, qtd_linhas);
                         break;
-                    case 3:
+                    case 'C':
                         printf("Saindo do sistema...\n");
                         delay(2);
                         break;
@@ -291,7 +405,7 @@ int main() {
                         limpar_entrada();
                         delay(2);
                 }
-            } while (opcao != 3);
+            } while (opcao != 'C');
         } 
         else {
             printf("Usuario ou senha incorretos! Tente novamente.\n");
