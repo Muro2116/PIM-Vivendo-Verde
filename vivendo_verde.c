@@ -197,6 +197,15 @@ void adicionar_produto(Produto **produtos, int *qtd) {
     fclose(arquivo);
 }
 
+void ler_float(float *variavel) {
+    do {
+        if (scanf("%f", variavel) != 1 || *variavel < 0) {
+            puts("Valor inválido. Tente novamente.");
+            limpar_entrada();
+        }
+    } while (*variavel < 0);
+}
+
 // Main
 int main() {
     char usuario[16], senha[16], opcao;
@@ -250,13 +259,15 @@ int main() {
                 printf("Opcao: ");
                 scanf(" %c", &opcao);
             
-                int continuar = 'S';
+                char continuar = 'S';
+
 
                 switch (opcao) {
                 case 'A':
                     imprimir_produtos(produtos, qtd_linhas);
 
                     while (continuar == 'S') {
+                        int resultado = 0;
                         float quantidade;
                         int id = 0, j, encontrado = 0;
 
@@ -272,7 +283,16 @@ int main() {
                                 // Exibe informações do produto encontrado
                                 printf("Produto encontrado: %s (%.2f por %s)\n", produtos[j].nomeproduto, produtos[j].valorproduto, produtos[j].tipovenda);
                                 printf("Digite a quantidade em %s: ", produtos[j].tipovenda);
-                                scanf("%f", &quantidade);
+                                
+                                do {
+                                    printf("Digite a quantidade em %s: ", produtos[j].tipovenda);
+                                    resultado = scanf("%f", &quantidade);
+                                    if (resultado != 1) {
+                                        puts("Valor invalido. Digite novamente!");
+                                        limpar_entrada();
+                                        continue;
+                                    }
+                                } while (resultado != 1 || quantidade <= 0);
 
                                 // Aloca espaço para o novo item no carrinho
                                 carrinho = (Carrinho *)realloc(carrinho, (num_itens + 1) * sizeof(Carrinho));
@@ -297,7 +317,13 @@ int main() {
 
                         // Pergunta se o usuário deseja adicionar mais produtos
                         printf("Deseja adicionar outro produto? (S - Sim, N - Nao): ");
-                        scanf(" %c", &continuar);
+                        do {
+                            scanf(" %c", &continuar);
+                            if (continuar != 'S' && continuar != 'N') {
+                                puts("Entrada invalida!");
+                            }
+                        } while(continuar != 'S' && continuar != 'N');
+                        
                     }
                     break;
 
@@ -428,6 +454,7 @@ int main() {
                 }
             } while (opcao != 'C');
         } 
+        
         else {
             puts("Usuario ou senha incorretos! Tente novamente...");
             delay(2);
