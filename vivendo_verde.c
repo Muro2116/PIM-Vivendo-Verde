@@ -8,6 +8,9 @@
 #include <unistd.h>  // Função "sleep" no Linux
 #endif
 
+#define COR_VERDE "\033[0;32m"
+#define COR_DEFAULT "\033[0m"
+
 // Função de delay
 void delay(float segundos) {
     // Windows
@@ -24,13 +27,13 @@ int exibir_logo() {
     // Localizar logo.txt
     FILE *arquivo = fopen("logo.txt", "r");
     if (arquivo == NULL) {
-        puts("Erro ao abrir a Logo");
+        puts("Erro ao abrir a Logo\n");
         return 1;
     }
     // Imprimir o Arquivo
     char linha[256];
     while (fgets(linha, sizeof(linha), arquivo)) {
-        printf("%s", linha);
+        printf(COR_VERDE "%s" COR_DEFAULT, linha);
         delay(0.5);
     }
     // Fechar o Arquivo
@@ -96,7 +99,7 @@ void ler_produtos(FILE *arquivo, Produto **produtos, int qtd) {
     // Aloca memória para os produtos
     *produtos = (Produto *)malloc(qtd * sizeof(Produto));
     if (*produtos == NULL) {
-        puts("Erro de alocacao!");
+        puts("Erro de alocacao!\n");
         exit(1); 
     }
 
@@ -121,7 +124,7 @@ int produto_existe(Produto *produtos, int qtd, const char *nome) {
 void adicionar_produto(Produto **produtos, int *qtd) {
     FILE *arquivo = fopen("produtos.txt", "a");
     if (arquivo == NULL) {
-        puts("Erro ao abrir o arquivo!");
+        puts("Erro ao abrir o arquivo!\n");
         return;
     }
 
@@ -129,16 +132,24 @@ void adicionar_produto(Produto **produtos, int *qtd) {
     float valornovo;
 
     do {
+        int verificador = 0;
         printf("Digite o nome do produto: ");
         scanf(" %49[^\n]", prodnovo);
 
         if (produto_existe(*produtos, *qtd, prodnovo)) {
-            puts("Produto ja cadastrado!");
+            puts("Produto ja cadastrado!\n");
         } 
         else {
             printf("Digite o valor do produto: ");
-            scanf("%f", &valornovo);
-            limpar_entrada();
+            do {
+                printf("Digite o preco: ");
+                verificador = scanf("%f", &valornovo);
+                if (verificador != 1) {
+                    puts("Valor invalido. Digite novamente!\n");
+                    limpar_entrada();
+                    continue;
+                }
+            } while (verificador != 1 || valornovo <= 0);
 
             // Escolha do tipo de venda com opção
             do {
@@ -152,7 +163,7 @@ void adicionar_produto(Produto **produtos, int *qtd) {
                     strcpy(tiponovo, "unidade");
                 } 
                 else {
-                    puts("Digite uma entrada valida!");
+                    puts("Digite uma entrada valida!\n");
                     limpar_entrada();
                     delay(1);
                 }
@@ -162,12 +173,12 @@ void adicionar_produto(Produto **produtos, int *qtd) {
             fprintf(arquivo, "%s %.2f %s\n", prodnovo, valornovo, tiponovo);
             // Força a gravação
             fflush(arquivo);
-            puts("Produto adicionado com sucesso!");
+            puts("Produto adicionado com sucesso!\n");
 
             // Reallocando memória do array de produtos
             Produto *temp = realloc(*produtos, (*qtd + 1) * sizeof(Produto));
             if (temp == NULL) {
-                puts("Erro de alocacao de memoria!");
+                puts("Erro de alocacao de memoria!\n");
                 fclose(arquivo);
                 return;
             }
@@ -197,15 +208,6 @@ void adicionar_produto(Produto **produtos, int *qtd) {
     fclose(arquivo);
 }
 
-void ler_float(float *variavel) {
-    do {
-        if (scanf("%f", variavel) != 1 || *variavel < 0) {
-            puts("Valor inválido. Tente novamente.");
-            limpar_entrada();
-        }
-    } while (*variavel < 0);
-}
-
 // Main
 int main() {
     char usuario[16], senha[16], opcao;
@@ -215,7 +217,7 @@ int main() {
 
     FILE *arquivo = fopen("produtos.txt", "r");
     if (arquivo == NULL) {
-        puts("Erro ao abrir o arquivo!");
+        puts("Erro ao abrir o arquivo!\n");
         return 1;
     }
 
@@ -249,13 +251,13 @@ int main() {
             printf("\nBem-vindo, %s!\n", usuario);
 
             do {
-                puts("Selecione uma Opcao:");
+                puts("\nSelecione uma Opcao:");
                 puts(" A. Adicionar Produto ao Carrinho");
                 puts(" B. Consultar Lista de Produtos");
                 puts(" C. Visualizar Carrinho");
                 puts(" D. Finalizar Compra");
                 puts(" E. Cancelar Compra");
-                puts(" F. Sair");
+                puts(" F. Sair\n");
                 printf("Opcao: ");
                 scanf(" %c", &opcao);
             
@@ -272,7 +274,7 @@ int main() {
                         int id = 0, j, encontrado = 0;
 
                         // Solicita o ID do produto desejado
-                        printf("Digite o ID do produto que deseja comprar: ");
+                        printf("\nDigite o ID do produto que deseja comprar: ");
                         scanf("%d", &id);
 
                         // Busca o produto pelo ID
@@ -281,14 +283,13 @@ int main() {
                                 encontrado = 1;
 
                                 // Exibe informações do produto encontrado
-                                printf("Produto encontrado: %s (%.2f por %s)\n", produtos[j].nomeproduto, produtos[j].valorproduto, produtos[j].tipovenda);
-                                printf("Digite a quantidade em %s: ", produtos[j].tipovenda);
+                                printf("\nProduto encontrado: %s (%.2f por %s)\n", produtos[j].nomeproduto, produtos[j].valorproduto, produtos[j].tipovenda);
                                 
                                 do {
-                                    printf("Digite a quantidade em %s: ", produtos[j].tipovenda);
+                                    printf("\nDigite a quantidade em %s: ", produtos[j].tipovenda);
                                     resultado = scanf("%f", &quantidade);
                                     if (resultado != 1) {
-                                        puts("Valor invalido. Digite novamente!");
+                                        puts("Valor invalido. Digite novamente!\n");
                                         limpar_entrada();
                                         continue;
                                     }
@@ -297,7 +298,7 @@ int main() {
                                 // Aloca espaço para o novo item no carrinho
                                 carrinho = (Carrinho *)realloc(carrinho, (num_itens + 1) * sizeof(Carrinho));
                                 if (carrinho == NULL) {
-                                    puts("Erro de memoria!");
+                                    puts("Erro de memoria!\n");
                                     return 1;
                                 }
 
@@ -306,21 +307,21 @@ int main() {
                                 carrinho[num_itens].valortotalcarrinho = produtos[j].valorproduto * quantidade;
                                 num_itens++;
 
-                                puts("Produto adicionado ao carrinho!");
+                                puts("Produto adicionado ao carrinho!\n");
                                 break;
                             }
                         }
 
                         if (!encontrado) {
-                            puts("Produto nao encontrado!");
+                            puts("Produto nao encontrado!\n");
                         }
 
                         // Pergunta se o usuário deseja adicionar mais produtos
-                        printf("Deseja adicionar outro produto? (S - Sim, N - Nao): ");
+                        printf("\nDeseja adicionar outro produto? (S - Sim, N - Nao): ");
                         do {
                             scanf(" %c", &continuar);
                             if (continuar != 'S' && continuar != 'N') {
-                                puts("Entrada invalida!");
+                                puts("Entrada invalida!\n");
                             }
                         } while(continuar != 'S' && continuar != 'N');
                         
@@ -333,7 +334,7 @@ int main() {
 
                     case 'C':
                         if (num_itens == 0) {
-                            puts("O carrinho esta vazio!");
+                            puts("O carrinho esta vazio!\n");
                         } 
                         else {
                             for (int i = 0; i < num_itens; i++) {
@@ -344,13 +345,13 @@ int main() {
 
                     case 'D':
                         if (num_itens == 0) {
-                            puts("O carrinho esta vazio!");
+                            puts("O carrinho esta vazio!\n");
                             delay(1);
                             break;
                         }
 
                         // Exibe os itens no carrinho e calcula o total
-                        puts(". . . . . . . . Itens no Carrinho . . . . . . . .");
+                        puts("\n. . . . . . . . Itens no Carrinho . . . . . . . .");
                         float valor_total = 0.0;
                         for (int i = 0; i < num_itens; i++) {
                             printf("Produto: %s | Valor Total: R$%.2f\n", carrinho[i].produtocarrinho, carrinho[i].valortotalcarrinho);
@@ -363,28 +364,28 @@ int main() {
                         char finalizar;
                         
                         do {
-                            printf("Deseja finalizar a compra? (S - Sim, N - Nao): ");
+                            printf("\nDeseja finalizar a compra? (S - Sim, N - Nao): ");
                             scanf(" %c", &finalizar);
                             if (finalizar != 'S' && finalizar != 'N') {
-                                puts("Entrada invalida!");
+                                puts("Entrada invalida!\n");
                             }
                         } while(finalizar != 'S' && finalizar != 'N');
                         
                         if (finalizar == 'S') {
-                            printf("Compra finalizada! Valor total: R$%.2f\n", valor_total);
+                            printf("\nCompra finalizada! Valor total: R$%.2f\n", valor_total);
                             // Libera a memória alocada para o carrinho e redefine as variáveis
                             free(carrinho);
                             carrinho = NULL;
                             num_itens = 0;
                         }
                         else {
-                            puts("Compra nao finalizada!");
+                            puts("Compra nao finalizada!\n");
                         }
                         break;
 
                     case 'E':
                         if (num_itens == 0) {
-                            puts("O carrinho esta vazio!");
+                            puts("O carrinho esta vazio!\n");
                             delay(1);
                             break;
                         }
@@ -392,31 +393,31 @@ int main() {
                         char cancelar;
 
                         do {
-                            printf("Tem certeza de que deseja cancelar a compra? (S - Sim, N - Nao): ");
+                            printf("\nTem certeza de que deseja cancelar a compra? (S - Sim, N - Nao): ");
                             scanf(" %c", &cancelar);
                             if (cancelar != 'S' && cancelar != 'N') {
-                                puts("Entrada invalida!");
+                                puts("Entrada invalida!\n");
                             }
                         } while(cancelar != 'S' && cancelar != 'N');
 
 
                         if (cancelar == 'S') {
-                            puts("Compra cancelada. Todos os itens foram removidos do carrinho");
+                            puts("\nCompra cancelada. Todos os itens foram removidos do carrinho\n");
                             // Libera a memória alocada para o carrinho e redefine as variáveis
                             free(carrinho);
                             carrinho = NULL;
                             num_itens = 0;
                         }
                         else {
-                            puts("Cancelamento de compra abortado");
+                            puts("Cancelamento de compra abortado\n");
                         }
                         break;
                     case 'F':
-                        puts("Saindo do sistema...");
+                        puts("\nSaindo do sistema...");
                         delay(1.5);
                         break;
                     default:
-                        puts("Opcao invalida!");
+                        puts("Opcao invalida!\n");
                         limpar_entrada();
                         delay(1);
                 }
@@ -433,7 +434,7 @@ int main() {
                 puts(" A. Adicionar Produto");
                 puts(" B. Consultar Lista de Produtos");
                 puts(" C. Sair");
-                printf("Opcao: ");
+                printf("\nOpcao: ");
                 scanf(" %c", &opcao);
 
                 switch (opcao) {
@@ -444,11 +445,11 @@ int main() {
                         imprimir_produtos(produtos, qtd_linhas);
                         break;
                     case 'C':
-                        puts("Saindo do sistema...");
+                        puts("\nSaindo do sistema...");
                         delay(1.5);
                         break;
                     default:
-                        puts("Opcao invalida!");
+                        puts("Opcao invalida!\n");
                         limpar_entrada();
                         delay(1);
                 }
