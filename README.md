@@ -14,20 +14,7 @@ Criar um sistema de automação que integre processos como vendas, controle de e
 - Cadastro, edição e remoção de produtos
 - Cálculo automático de valores com base em **peso** ou **unidade**
 - Carrinho editável com opção de finalizar ou cancelar compras
-- Integração com dispositivos físicos: **balança digital** e **leitor de código de barras**
 - Armazenamento local de dados
-- Aplicativo para clientes com:
-  - Acesso a promoções
-  - Dicas de aproveitamento de alimentos
-  - Campanhas de sustentabilidade
-
----
-
-## 🔐 Requisitos Não Funcionais
-
-- Segurança de dados com **hashing SHA-256** para senhas
-- Aplicação local com controle de IPs fixos
-- Sistema operacional Linux nos caixas
 
 ---
 
@@ -42,8 +29,6 @@ O projeto inclui a campanha **"Reciclou, Descontou!"**, onde clientes podem troc
 - Linguagem C
 - Banco de dados local
 - Linux (sistema dos caixas)
-- Equipamentos de leitura: balança digital e leitor de código de barras
-- Aplicativo Android (conceito)
 
 ---
 
